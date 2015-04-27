@@ -1,0 +1,7 @@
+[user]
+	name = Christophe Michard
+	email = michardchristophe@free.fr
+[core]
+	editor = vim
+[color]
+	ui = auto

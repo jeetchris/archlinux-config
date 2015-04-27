@@ -1,0 +1,12 @@
+#
+# These things are run when an Openbox X Session is started.
+#
+
+# Bureau
+pcmanfm --desktop &
+
+# Grid layout
+obsetlayout 0 3 3 0 &
+
+# Barre des tâches
+#tint2 &

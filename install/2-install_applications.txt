@@ -1,0 +1,244 @@
+#!/bin/bash
+
+## NOTES
+# - On évite de construire les paquets en root autant que possible
+#   Donc se connecter au compte utilisateur dès que possible
+# - Horloge système (hardware)
+#   L'horloge se synchronise apparemment quand on éteint puis redémarre la VM (pas reboot)
+
+
+## Activer la compilation à plusieurs processeurs par défaut
+# Décommenter MAKEFLAGS="-j2" dans /etc/makepkg.conf
+vi /etc/makepkg.conf
+
+## Mise à jour du système
+# On reconfigure les miroirs
+# -Syy : mise à jour des dépôts même s'ils semblent être à jour
+#        utile après la modification de /etc/pacman.d/mirrorlist
+# -Syu : mise à jour des dépôts et du système
+#        toujours le faire lors de l'installation d'un paquet
+vi /etc/pacman.d/mirrorlist
+pacman -Syyu
+
+## Installer yaourt
+# Compiler ou utiliser le dépôt [archlinuxfr] (https://archlinux.fr/yaourt-en)
+# Ici, on utilise le dépôt :
+# - Ajouter le dépôt archlinux dans /etc/pacman.conf
+#    [archlinuxfr]
+#    SigLevel = Never
+#    Server = http://repo.archlinux.fr/$arch
+# - Installation de yaourt
+# - Commenter le dépôt [archlinuxfr] qui n'est plus utile après installation
+# Les mises à jour avec yaourt se font avec yaourt -Syua par la suite
+#  -S...a : pour le dépôt AUR en plus du reste
+cat <<EOF >> /etc/pacman.conf
+
+[archlinuxfr]
+SigLevel = Never
+Server = http://repo.archlinux.fr/$arch
+EOF
+pacman -Syu yaourt
+vi /etc/pacman.conf
+
+## Installation et configuration des paquets
+# Section en deux temps :
+#  1) Explication et installation des paquets
+#  2) Configuration par paquet ensuite (autres blocs de commentaires)
+#     La plupart des configurations sont contenus dans mes fichiers de configurations (copiés/collés)
+#     Ici ne sont que les configurations obligatoires (ajout d'un groupe à l'utilisateur par exemple)
+#     ou juste une explication succincte de ce qui a été modifié dans un fichier de configuration,
+#     même s'il est copié/collé
+##
+# - bash-completion : permet entre autres la complétion des noms de package dans pacman/yaourt (sauf AUR)
+# - virtualbox-guest-utils : additions de VirtualBox
+# - alsa-utils : gestion du son (ALSA est inclus dans le noyau linux)
+# - lxsession : fourni lxpolkit
+#   Implémentation de PolicyKit, inutile si j'installe un environnement de bureau tout fait
+#   Résout au passage un problème de droits dans tty quand je reboote
+#   Rebooter une fois après installation pour que ça marche
+# - gvim : vim est inclus, éditeur de texte
+#   - unzip : pour pouvoir explorer les .zip dans vim
+#   - ctags : pour l'autocomplétion, dépendance d'extensions pour vim
+#   - git : versionnage de fichiers, permet d'installer Vundle pour vim
+# - cantarell-fonts : police de caractères
+#   Utilisation comme police globale pour le bureau
+# - ttf-liberation : police de caractères
+#   Je l'utilise principalement dans le terminal (Liberation Mono 11)
+# - ttf-ubuntu-font-family : police de caractères
+#   J'hésite avec Liberation pour le terminal (Ubuntu Mono 13)
+# - otf-ipafont : police de caractères japonaise
+#   Ma police pour caractère larges, dans xterm entre autres (IPAGothic)
+#   C'est également celle que j'utilise dans LaTeX pour écrire en japonais
+# - xorg-server : Xorg, base de toute la gestion graphique (un jour ça passera peut-être à Wayland)
+#   - xorg-xrdb : charge ~/.Xresources
+# - lxdm : gestionnaire de sessions (l'écran de connexion)
+#   - librsvg : permet d'afficher l'arrière-plan du thème par défaut de lxdm (Industrial)
+#   - gtk-engines : thèmes GTK+ (en particulier Clearlooks pour lxdm)
+# - openbox : gestionnaire de fenêtres
+#   - python2-xdg : besoin pour que openbox-xdg-autostart fonctionne correctement (/etc/xdg/autostart/*)
+#   - obconf : GUI pour configurer Openbox
+#   - lxappearance-obconf : GUI pour configurer Openbox (plus poussée, par exemple gestion des icônes)
+#   - obmenu-generator : génération automatique de menu pour Openbox
+#     Notamment rafraichi la liste des applications installées
+#   - obsetlayout : permet de définir la disposition des bureaux
+#     Par exemple "obsetlayout 0 3 3 0" pour une grille 3x3
+# - gnome-themes-standard : thèmes Adwaita et HiColor de gnome (j'utilise Adwaita)
+# - gnome-icon-theme : icônes de gnome
+#   - gnome-icon-theme-extras : icônes additionelles
+#   - gnome-icon-theme-symbolic : icônes addtionelles
+# - xterm : terminal
+#   - tmux : multiplexeur de terminal
+# - pcmanfm : explorateur de fichiers et gestionnaire du bureau (avec fond d'écran)
+# - tint2 : barre des tâches
+#   - pygtk : dépendance pour tintwizard.py qui permet de configurer tint2
+# - mirage : visionneuse d'image
+# - file-roller : explorateur d'archives
+# - evince : lecteur pdf, postscript, etc.
+# - firefox : navigateur internet
+# - tree : pour afficher une arborescence
+# - rsync : copie rapide de fichiers
+
+yaourt -Syua \
+    bash-completion \
+    virtualbox-guest-utils \
+    alsa-utils \
+    lxsession \
+    gvim unzip ctags git \
+    cantarell-fonts ttf-liberation ttf-ubuntu-font-family otf-ipafont \
+    xorg-server xorg-xrdb \
+    lxdm librsvg gtk-engines \
+    openbox python2-xdg obconf lxappearance-obconf obmenu-generator obsetlayout \
+    gnome-themes-standard \
+    gnome-icon-theme gnome-icon-theme-extras gnome-icon-theme-symbolic \
+    xterm tmux \
+    pcmanfm \
+    tint2 pygtk \
+    mirage \
+    file-roller \
+    evince \
+    firefox \
+    tree \
+    rsync \
+     \
+    apache php php-apache mariadb phpmyadmin \
+    php-composer php-intl xdebug \
+    openssh \
+     \
+    flashplugin \
+     \
+
+## Additions de VirtualBox
+# Créer /etc/modules-load.d/virtualbox.conf
+# Insérer :
+#  vboxguest
+#  vboxsf
+#  vboxvideo
+# Pour les dossiers partagés, chmoder le dossier /media
+#  chmod o+rx /media
+#  ln -s /media/sf_folder
+cat <<EOF >> /etc/modules-load.d/virtualbox.conf
+vboxguest
+vboxsf
+vboxvideo
+EOF
+systemctl enable vboxservice
+usermod -aG vboxsf $(whoami)
+
+## Activer le son
+# Tester avec "speaker-test -c 2"
+amixer set Master 100 unmute
+amixer set PCM 100 unmute
+
+## Configurer git et gvim
+# Copier ma configuration de base pour vim
+# chmoder comme un touch monfichier.txt (chmod 644)
+# Ne pas oublier /root
+# Instructions dans mon .vimrc pour l'installation des bundles
+git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
+vim ~/.vimrc
+
+####### Le fichier n'est pas finalisé à partir d'ici
+# Globalement copier toutes les configurations
+# Vérifier tous les chmod
+
+## Configurer bash
+# Copier ma configuration
+# bash-completion permet la complétion des noms de packages dans yaourt
+vim ~/.bashrc
+
+## Installer un environnement de bureau
+# Xorg
+#  Créer /etc/xorg.conf ou /etc/X11/xorg.conf (plein de façons possibles)
+#  Définir l'agencement du clavier
+#  Désactiver AIGLX à cause d'une erreur dans /var/Xorg.log
+# Dekstop Manager : LXDM
+#  Définir le thème par défaut dans /etc/lxdm/lxdm.conf
+# Windows Manager : Openbox
+#  conf in ~/.config/openbox
+#  default in /etc/xdg/openbox
+#  Il faut redémarrer la session X pour que le changement
+#  du nombre de bureaux prenne effet, ou sinon utiliser obconf
+vi /etc/lxdm/lxdm.conf
+reset=1
+systemctl enable lxdm
+mkdir ~/.config
+cp -R /etc/xdg/openbox ~/.config
+cp -R /etc/xdg/obmenu-generator ~/.config
+
+## Installer un navigateur
+# Firefox
+# - Définir .config/user-dirs.dirs pour l'empêcher de créer
+#   automatiquement les dossier Desktop, Downloads, etc.
+
+## LAMP
+# MariaDB
+# - Sécuriser l'installation via le script fourni, laisser les utilisateurs anonymes
+# PHP
+# - Décommenter les extensions dans /etc/php/php.ini
+#   - mysql.so : déprécié, pour pouvoir utiliser les vieilles fonctions mysql_connect, etc.
+#   - mysqli.so : fonctions mysqli
+#   - pdo_mysql.so : PDO
+#   - iconv.so intl.so posix.so : pour symfony2, posix permet la coloration de la console
+#   - openssl.so
+# - Définir
+#   - date.timezone = Asia/Tokyo
+# Apache
+# - Dans /etc/httpd/conf/httpd.conf
+#   - Ajouter
+#     - LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
+#     - LoadModule php5_module modules/libphp5.so
+#     - Include conf/extra/php5_module.conf
+#   - Décommenter
+#     - LoadModule rewrite_module modules/mod_rewrite.so
+#   - Commenter
+#     - LoadModule mpm_event_module modules/mod_mpm_event.so
+# phpMyAdmin
+# - Ajouter dans /etc/httpd/conf/httpd.conf
+#   - Include conf/extra/httpd-phpmyadmin.conf
+#   - :/etc/webapps (à la fin de open_basedir)
+# - Créer /etc/httpd/conf/extra/httpd-phpmyadmin.conf
+# - Pour l'auto-connexion, ajouter dans /etc/webapps/phpmyadmin/config.inc.php
+#   - $cfg['Servers'][$i]['AllowNoPassword'] = true;
+#   - $cfg['Servers'][$i]['auth_type'] = 'config';
+# XDebug
+# - Décommenter les lignes dans /etc/php/conf.d/xdebug.ini
+#   et ajouter
+#     xdebug.max_nesting_level=200
+systemctl enable mysqld
+systemctl start mysqld
+mysql_secure_installation
+
+
+cat <<EOF >> /etc/httpd/conf/extra/httpd-phpmyadmin.conf
+Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
+<Directory "/usr/share/webapps/phpMyAdmin">
+    DirectoryIndex index.html index.php
+    AllowOverride All
+    Options FollowSymlinks
+    Require all granted
+</Directory>
+EOF
+
+systemctl enable httpd
+systemctl start httpd
+

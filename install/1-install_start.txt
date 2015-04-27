@@ -1,0 +1,139 @@
+#!/bin/bash
+
+## Disposition du clavier pour la session
+# fr-pc : clavier standard
+# fr-latin1 : clavier sans pavé numérique
+loadkeys fr-latin1
+
+## Partitionnement
+# Avec VirtualBox, pas d'UEFI
+# MBR ou GPT ? GPT
+# Syslinux ou GRUB ? Si GRUB, besoin d'une partition BIOS Boot
+# Suppose GRUB
+## Outil
+# Dépend du type de partitionnement
+# Ici, gdisk (ligne de commande) ou cgdisk (avec mini interface)
+# Types de partition :
+# - ef02 : BIOS boot partition
+# - 8200 : Linux swap
+# - 8300 : Linux filesystem
+# - 8302 : Linux /home
+## Tailles pour un disque de 20 GiB
+# - BIOS boot (ef02) : 32 MiB
+# - /boot (8300) : 100 MiB
+# - swap (8200) : 1 GiB ? (dépend de la RAM)
+# - / (8300) : 15 GiB ?
+# - /home (8302) : 3.9 GiB ? (le reste)
+## Exemple
+# Part. #     Size        Partition Type            Partition Name
+# ----------------------------------------------------------------
+#             1007.0 KiB  free space
+#    1        32.0 MiB    BIOS boot partition       BIOS boot partition
+#    2        100.0 MiB   Linux filesystem          Linux /boot
+#    3        1024.0 MiB  Linux swap                Linux swap
+#    4        15.0 GiB    Linux filesystem          Linux /
+#    5        3.9 GiB     Linux /home               Linux /home
+## Remarque
+# Le reste du fichier suppose l'exemple du dessus qui recouvre tous les cas
+# En réalité la swap peut être inutile, GRUB non utilisé, /, /boot et /home ensembles, etc.
+
+## Formatage
+# On ne formate pas la BIOS boot partition (ici /dev/sda1)
+# ext4 journalise, pas ext2 (donc ext2 mieux pour les petites partitions)
+mkfs.ext2 /dev/sda2
+mkswap /dev/sda3
+mkfs.ext4 /dev/sda4
+mkfs.ext4 /dev/sda5
+
+## Montage
+mount /dev/sda4 /mnt
+cd /mnt
+mkdir boot
+mkdir home
+mount /dev/sda2 boot
+mount /dev/sda5 home
+swapon /dev/sda3
+
+## Vérification visuelle de la date
+timedatectl
+
+## Installation du système de base et de GRUB dans le même temps
+# Placer un miroir proche en premier dans /etc/pacman.d/mirrorlist
+vi /etc/pacman.d/mirrorlist
+pacstrap /mnt base base-devel grub
+
+## Configuration des partitions
+genfstab -U -p /mnt >> /mnt/etc/fstab
+
+## Changer le dossier racine (= / ) de l'iso vers /mnt
+# Ajouter /bin/bash pour que le shell soit bash au lieu de sh (optionnel)
+arch-chroot /mnt /bin/bash
+
+## Nom de la machine
+# En profiter pour l'ajouter dans /etc/hosts
+# 127.0.0.1     localhost.localdomain   localhost   ordi
+echo ordi > /etc/hostname
+vi /etc/hosts
+
+## Définir la locale
+# Dans /etc/locale.gen, décommenter les lignes fr... (UTF-8, ISO et euro)
+# Générer via locale-gen
+# Définir la locale voulue pour le système dans /etc/locale.conf
+# - Locale : LANG="fr_FR.UTF-8"
+# - Ordre alphabétique pour ls (fichiers .* devant le reste) : LC_COLLATE="C"
+# Exporter la valeur pour la session courante
+vi /etc/locale.gen
+locale-gen
+echo 'LANG="fr_FR.UTF-8"' > /etc/locale.conf
+echo 'LC_COLLATE="C"' >> /etc/locale.conf
+export LANG=fr_FR.UTF-8
+
+## Définir la disposition du clavier pour les consoles tty (ctrl+alt+num)
+echo 'KEYMAP=fr-latin1' > /etc/vconsole.conf
+
+## Choix du fuseau horaire
+ln -s /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+## Horloge système (hardware)
+# Utiliser UTC
+hwclock --systohc --utc
+
+## Création des ramdisks
+mkinitcpio -p linux
+
+## Configuration de GRUB
+grub-install --no-floppy --recheck /dev/sda
+grub-mkconfig -o /boot/grub/grub.cfg
+
+## Fin, reboot, enlever l'iso
+exit
+reboot
+
+## Définir le mot de passe pour root
+passwd
+
+## Ajouter le droit de sudo au group wheel
+# Utiliser visudo, qui vérifie le fichier au moment de la sauvegarde
+# Il ouvre automatiquement /etc/sudoers
+# Décommenter la ligne %wheel ALL=(ALL) ALL
+# Garder le % qui signifie "groupe"
+visudo
+
+## Créer un utilisateur
+# https://wiki.archlinux.org/index.php/Users_and_groups
+# useradd -m -g [initial_group] -G [additional_groups] -s [login_shell] [username]
+# -m : crée le dossier home
+# -g : ne pas utiliser pour créer un groupe du même nom que l'utilisateur
+# -s : shell de base (en général /bin/bash)
+#      "cat /etc/shells" pour la liste des shells utilisables (= installés)
+# usermod -aG [additional_groups] [username]
+# -a : ajouter (append)
+# -G : aux groupes additionnels
+useradd -m -G users,wheel -s /bin/bash chris
+passwd chris
+
+## Activer le réseau
+# enable : automatiquement au boot
+# start : là, tout de suite
+systemctl enable dhcpcd
+systemctl start dhcpcd
