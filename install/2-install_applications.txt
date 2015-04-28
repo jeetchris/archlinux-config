@@ -228,7 +228,6 @@ systemctl enable mysqld
 systemctl start mysqld
 mysql_secure_installation
 
-
 cat <<EOF >> /etc/httpd/conf/extra/httpd-phpmyadmin.conf
 Alias /phpmyadmin "/usr/share/webapps/phpMyAdmin"
 <Directory "/usr/share/webapps/phpMyAdmin">
@@ -242,3 +241,25 @@ EOF
 systemctl enable httpd
 systemctl start httpd
 
+
+## RVM et Rails
+# - Ajouter dans le .bashrc
+#   - source $HOME/.rvm/scripts/rvm
+#   - [[ -r "$HOME/.rvm/scripts/completion" ]] && source "$HOME/.rvm/scripts/completion"
+#   - export rvm_ignore_gemrc_issues=1
+# - Enregistrer la clé
+# - Installer RVM
+# - Installer et définir une version de ruby par défaut
+# - Si besoin :
+#   - Créer un gemset et l'utiliser
+# - Installer rails et bundler
+
+gem  list --local | awk '{print "gem uninstall " $1}' | bash
+gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+\curl -sSL https://get.rvm.io | bash -s -- --ignore-dotfiles
+rvm install 2.2.2
+rvm use 2.2.2 --default
+rvm gemset create default_gems
+rvm gemset use default_gems
+gem install rails
+gem install bundler

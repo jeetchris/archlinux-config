@@ -36,6 +36,10 @@ loadkeys fr-latin1
 ## Remarque
 # Le reste du fichier suppose l'exemple du dessus qui recouvre tous les cas
 # En réalité la swap peut être inutile, GRUB non utilisé, /, /boot et /home ensembles, etc.
+gdisk
+# /dev/sda
+# n enter enter +32M ef02
+# ...
 
 ## Formatage
 # On ne formate pas la BIOS boot partition (ici /dev/sda1)

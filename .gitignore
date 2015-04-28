@@ -1,9 +1,11 @@
 .adobe/
 .cache/
 .gem/
+.gnupg/
 .local/
 .macromedia/
 .mozilla/
+.rvm/
 .ssh/
 .thumbnails/
 .vim/
