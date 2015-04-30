@@ -23,3 +23,4 @@ sf_partages
 .viminfo
 .Xauthority
 .xsession-errors
+.config/obmenu-generator/cache.db
