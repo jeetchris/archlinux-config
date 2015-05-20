@@ -30,6 +30,7 @@ NeoBundle 'ujihisa/unite-colorscheme'
 
 NeoBundle 'beyondwords/vim-twig'
 NeoBundle 'groenewege/vim-less'
+NeoBundle 'slim-template/vim-slim'
 
 NeoBundle 'tpope/vim-fugitive'
 NeoBundle 'tpope/vim-rails'

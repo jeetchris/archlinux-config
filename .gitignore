@@ -18,6 +18,8 @@ sf_partages
 
 .bash_history
 .mysql_history
+.irb-history
+.pry_history
 .NERDTreeBookmarks
 .vboxclient-*
 .viminfo
