@@ -2,6 +2,9 @@
 # These things are run when an Openbox X Session is started.
 #
 
+# DPI
+xrandr --dpi 96
+
 # Bureau
 pcmanfm --desktop &
 
