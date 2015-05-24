@@ -5,3 +5,17 @@
 	editor = vim
 [color]
 	ui = auto
+[alias]
+	br = branch
+	brd = branch -d
+	ci = commit
+	co = checkout
+	st = status
+	llog = log --oneline --graph
+
+	com = checkout master
+	plum = pull upstream master
+	plom = pull origin master
+	psom = push origin master
+	rim = rebase --interactive master
+	bakaci = commit -m 'To be fixup'
