@@ -33,6 +33,7 @@ NeoBundle 'groenewege/vim-less'
 NeoBundle 'slim-template/vim-slim'
 
 NeoBundle 'tpope/vim-fugitive'
+NeoBundle 'airblade/vim-gitgutter'
 NeoBundle 'tpope/vim-rails'
 
 if has('lua')
