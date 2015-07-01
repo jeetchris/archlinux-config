@@ -1,6 +1,9 @@
 ! Pour toutes les application Xlib : *foreground: ...
 ! Seulement XTerm : xterm*foreground: ...
 
+! Corrige un problème de dpi
+Xft.dpi: 96.0
+
 ! L'économisateur d'écran utilise lxdm
 xscreensaver.newLoginCommand: lxdm -c USER_SWITCH
 
