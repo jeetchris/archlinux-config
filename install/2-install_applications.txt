@@ -200,21 +200,25 @@ cp -R /etc/xdg/obmenu-generator ~/.config
 #   - pdo_mysql.so : PDO
 #   - iconv.so intl.so posix.so : pour symfony2, posix permet la coloration de la console
 #   - openssl.so
+#   - phar.so : pour utiliser symfony2
 # - Définir
 #   - date.timezone = Asia/Tokyo
+# - Ajouter à la fin de open_basedir
+#   - :/usr/bin:/usr/local/bin (pour utiliser symfony2)
 # Apache
 # - Dans /etc/httpd/conf/httpd.conf
 #   - Ajouter
-#     - LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
 #     - LoadModule php5_module modules/libphp5.so
 #     - Include conf/extra/php5_module.conf
 #   - Décommenter
+#     - LoadModule mpm_prefork_module modules/mod_mpm_prefork.so
 #     - LoadModule rewrite_module modules/mod_rewrite.so
 #   - Commenter
 #     - LoadModule mpm_event_module modules/mod_mpm_event.so
 # phpMyAdmin
 # - Ajouter dans /etc/httpd/conf/httpd.conf
 #   - Include conf/extra/httpd-phpmyadmin.conf
+# - Ajouter dans /etc/php/php.ini
 #   - :/etc/webapps (à la fin de open_basedir)
 # - Créer /etc/httpd/conf/extra/httpd-phpmyadmin.conf
 # - Pour l'auto-connexion, ajouter dans /etc/webapps/phpmyadmin/config.inc.php
