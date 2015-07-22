@@ -147,7 +147,7 @@ set expandtab
 set shiftwidth=4
 set tabstop=4
 set softtabstop=4
-au FileType ruby set softtabstop=2 tabstop=2 shiftwidth=2
+au FileType ruby setlocal softtabstop=2 tabstop=2 shiftwidth=2
 
 "" Recherche
 set ignorecase
