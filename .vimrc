@@ -11,6 +11,20 @@
 "   Refer to :help neobundle for more examples and for a full list of commands.
 ""
 
+" Skip initialization for vim-tiny or vim-small
+if 0 | endif
+
+" Installe NeoBundle automatiquement
+if !isdirectory(expand('~/.vim/bundle/neobundle.vim'))
+    if executable ('git')
+        echo "> Installing NeoBundle...\n"
+        silent exe '!git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim'
+    else
+        echo 'You must install git before using this vimrc file'
+        finish
+    endif
+endif
+
 " Initialisation
 if has('vim_starting')
     set nocompatible
@@ -89,8 +103,10 @@ set background=dark
 " t_Co devrait être bien détecté si le terminal est bien configuré
 " Ce n'est pas à vim de le mettre à 256 soi-même
 " tty ne supporte pas 256, d'où la condition pour s'en tenir au jeu par défaut
-if &t_Co==256
-    color mustang
+if neobundle#is_installed("unite-colorscheme")
+    if &t_Co==256
+        color mustang
+    endif
 endif
 
 " Configuration pour gViM
