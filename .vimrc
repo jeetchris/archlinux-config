@@ -1,20 +1,20 @@
+" Skip initialization for vim-tiny or vim-small
+if 0 | endif
+
 """"""""""""
 " NeoBundle
 """"""""""""
-" Installation initiale via git:
+" Initial installation via git (done automatically, see below):
 "   git clone https://github.com/Shougo/neobundle.vim ~/.vim/bundle/neobundle.vim
 ""
-" Gestion des bundles:
+" Bundles management:
 "   :NeoBundleList - list configured bundles
 "   :NeoBundleInstall(!) - install (update) bundles
 "   :NeoBundleClean(!) - confirm (or auto-approve) removal of unused bundles
 "   Refer to :help neobundle for more examples and for a full list of commands.
 ""
 
-" Skip initialization for vim-tiny or vim-small
-if 0 | endif
-
-" Installe NeoBundle automatiquement
+"" Auto-install NeoBundle
 if !isdirectory(expand('~/.vim/bundle/neobundle.vim'))
     if executable ('git')
         echo "> Installing NeoBundle...\n"
@@ -25,7 +25,7 @@ if !isdirectory(expand('~/.vim/bundle/neobundle.vim'))
     endif
 endif
 
-" Initialisation
+"" Initialization
 if has('vim_starting')
     set nocompatible
     set runtimepath+=~/.vim/bundle/neobundle.vim/
@@ -33,10 +33,10 @@ endif
 
 call neobundle#begin(expand('~/.vim/bundle'))
 
-" Laisse NeoBundle se gérer tout seul
+"" Let NeoBundle manage itself
 NeoBundleFetch 'Shougo/neobundle.vim'
 
-" Mes bundles
+"" My bundles
 NeoBundle 'flazz/vim-colorschemes'
 NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'Shougo/unite.vim'
@@ -76,16 +76,10 @@ NeoBundle 'Shougo/vimproc.vim', {
 "NeoBundle 'kien/ctrlp.vim'
 "NeoBundle 'flazz/vim-colorschemes'
 
-" You can specify revision/branch/tag.
-"NeoBundle 'Shougo/vimshell', { 'rev' : '3787e5' }
-
-" Fin
+"" End
 call neobundle#end()
 
-filetype plugin indent on
-
-" Vérifie au démarrage de vim si des bundles ne sont pas installés
-" et demande le cas échéant si on souhaite les installer
+"" Check and ask to install bundles if needed when Vim starts
 NeoBundleCheck
 
 
@@ -93,67 +87,108 @@ NeoBundleCheck
 " Coloration
 """""""""""""
 
-"" Active la coloration syntaxique (syntax highlighting)
-syntax on
+if has("syntax") || has("gui_running")
 
-"" Fond sombre
-set background=dark
+    "" Enable syntax highlighting
+    syntax on
 
-"" Jeu de couleurs
-" t_Co devrait être bien détecté si le terminal est bien configuré
-" Ce n'est pas à vim de le mettre à 256 soi-même
-" tty ne supporte pas 256, d'où la condition pour s'en tenir au jeu par défaut
-if neobundle#is_installed("unite-colorscheme")
-    if &t_Co==256
-        color mustang
+    "" Dark theme
+    set background=dark
+
+    "" Color scheme
+    " gViM settings
+    "   Delete italics (gViM mustang)
+    "   Default font
+    " Terminal settings
+    "   t_Co should be correctly detected if the terminal is correctly configured
+    "   ViM should not set 256 by itself
+    "   tty does not support 256, so we have to test t_Co before using mustang
+    if has('gui_running')
+        if neobundle#is_installed("unite-colorscheme")
+            color mustang
+            hi String gui=none
+            hi Comment gui=none
+        endif
+        set guifont=Liberation\ Mono\ 11
+    else
+        if &term =~ "-256color" || $COLORTERM =~ "gnome-terminal"
+            set t_Co=256
+        endif
+
+        if &t_Co==256 && neobundle#is_installed("unite-colorscheme")
+            color mustang
+        endif
     endif
+
+    "" Disable current line highlighting (prevent ViM to slow down)
+    highlight CursorLine cterm=NONE
+
 endif
 
-" Configuration pour gViM
-" + suppression des italiques (mustang pour gViM)
-" + police de caractère par défaut
-if has('gui_running')
-    color mustang
-    hi String gui=none
-    hi Comment gui=none
-    set guifont=Liberation\ Mono\ 11
+
+""""""""""""""""""
+" Various options
+""""""""""""""""""
+
+filetype plugin indent on
+
+"" Encoding detection
+set fileencodings=ucs-bom,utf-8,sjis,default,latin1
+set fileencodings=ucs-bom,utf-8,default,latin1
+
+"" Mouse support
+if has("mouse")
+    set mouse=a
 endif
 
-""""""""""""
-" Apparence
-""""""""""""
+"" Folding
+if has("folding")
+    set foldmethod=indent
+    set foldlevel=1
+    set foldnestmax=1
+    set nofoldenable
+endif
+
+"" Autocompletion
+if has("wildmenu")
+    set wildmenu
+    set wildchar=<Tab>
+    set wildmode=longest:full,full
+endif
 
 "" Statusline
 set laststatus=2
 set statusline=%F\ %m%r%w\ (%{&fenc},\ %{&ff})\ %=\ %l/%L,%v\ \ %P
 
+"" Highlight tabs and trailing spaces
+set list
+set listchars=tab:>.,trail:.,extends:#,nbsp:.
 
-"""""""""""""""""""
-" Options diverses
-"""""""""""""""""""
-filetype on
-filetype plugin on
-
-"" Détection de l'encodage
-set fileencodings=ucs-bom,utf-8,sjis,default,latin1
-set fileencodings=ucs-bom,utf-8,default,latin1
-
-"" Pas de fichiers de sauvegarde
-" Pas de fichiers de sauvegarde automatique (problématique
-" en cas de crash). Sinon changer le dossier des swapfiles.
+"" No backup/swap files
 set nobackup
 set noswapfile
 
-"" Différentes options
+"" Various options
 set title
 set number
 set showmatch
+set showcmd
 set backspace=indent,eol,start
-set mouse=a
 set nopaste
+set nrformats=hex
+set splitbelow
+set splitright
+set scrolloff=6
+set wrap
+set showfulltag
 
-"" Tabulation et indentation
-filetype indent on
+"" Search
+set ignorecase
+set smartcase
+set hlsearch
+set incsearch
+
+"" Tabs and indent
 set smartindent
 set autoindent
 set copyindent
@@ -163,151 +198,43 @@ set expandtab
 set shiftwidth=4
 set tabstop=4
 set softtabstop=4
-au FileType ruby setlocal softtabstop=2 tabstop=2 shiftwidth=2
 
-"" Recherche
-set ignorecase
-set smartcase
-set hlsearch
-set incsearch
-
-"" Mise en évidence des tabulations et espaces invisibles
-" :help listchars pour les détails
-set list
-set listchars=tab:>.,trail:.,extends:#,nbsp:.
-
-"" Non mise en subrillance de la ligne courante
-" Vim risque de laguer
-highlight CursorLine cterm=NONE
-
-"" Auto-complétion
-set wildmenu
-set wildchar=<Tab>
-set wildmode=longest:full,full
-
-"" Folding
-set foldmethod=indent
-set foldlevel=1
-set foldnestmax=1
-set nofoldenable
-
-"""""""""""""""""""""
-" Raccourcis clavier
-"""""""""""""""""""""
-
-"" Change la touche mapleader de \ à ,
-let mapleader=","
-
-"" Source le .vimrc
-nmap <F11> :source ~/.vimrc<CR>
-
-"" Mappage correct des touches flèches dans tmux quand xterm-keys=on
-if &term =~ '^screen'
-    execute "set <xUp>=\e[1;*A"
-    execute "set <xDown>=\e[1;*B"
-    execute "set <xRight>=\e[1;*C"
-    execute "set <xLeft>=\e[1;*D"
+"" Settings for specific filetypes
+if has("autocmd")
+    autocmd FileType ruby setlocal softtabstop=2 tabstop=2 shiftwidth=2
 endif
 
-"" Enregistre d'un fichier ouvert en lecture seule
-" Permet d'enregistrer un fichier ouvert en lecture seule
-" (sans les droits root) sans avoir besoin de fermer Vim.
-" Utiliser la commande :w!!
-cmap w!! w !sudo tee % >/dev/null
 
-"" Mode collage
-" Passe en mode collage (set paste). Désactive l'indentation
-" automatique en mode insertion via F2 afin de pouvoir coller
-" un texte avec la souris ou Ctrl+r + (+ = Shift+=).
-" Besoin de +xterm_clipboard dans les options de compilation.
-set pastetoggle=<F2>
+""""""""""""""""""
+" Bundle settings
+""""""""""""""""""
 
-"" Colle le contenu du presse-papier système via <leader>p
-nmap <silent> <leader>p :set paste<CR>a<C-R><S-+><Esc>:set nopaste<CR>
+"" NERDTree
+if neobundle#is_installed("nerdtree")
 
-"" Supprime la subrillance des résultats de recherche
-" Permet de faire disparaitre le surlignage des résultats de
-" recherche via la commande <leader>/
-nmap <silent> <leader>/ :nohlsearch<CR>
+    "" Show hidden files
+    let NERDTreeShowHidden=1
 
-"" Déplacement lorsqu'un texte est wrappé
-" Permet de se déplacer de ligne en ligne naturellement quand
-" un texte est wrappé (trop long, donc passe à la ligne automatiquement).
-nnoremap <down> gj
-nnoremap <up> gk
+    "" Change the arrows appearance in the directory tree
+    let NERDTreeDirArrows=0
 
-"" Navigation rapide entre les splits (Ctrl+flèche)
-map <C-left> <C-w>h
-map <C-down> <C-w>j
-map <C-up> <C-w>k
-map <C-right> <C-w>l
+endif
 
-"" Raccourcis pour la programmation
-noremap { {}<Left>
-inoremap {<CR> {<CR>}<Esc>O
-inoremap {{ {
-inoremap {} {}
+"" Unite
+if neobundle#is_installed("unite.vim")
 
-"" Change le format de fichier à unix et l'encodage à utf-8
-nmap <F12> :set ff=unix fenc=utf-8<CR>:w<CR>
+    "" Store the yank history
+    let g:unite_source_history_yank_enable = 1
 
+endif
 
-"""""""""""
-" NERDTree
-"""""""""""
-
-"" Ouvre/ferme NERDTree via F3
-nmap <silent> <F3> :NERDTreeToggle<CR>
-
-"" Voir les fichiers cachés par défaut
-let NERDTreeShowHidden=1
-
-"" Changer l'appparence des flèches de l'arborescence
-let NERDTreeDirArrows=0
-
-
-"""""""""
-" TagBar
-"""""""""
-
-" Ouvre/ferme TagBar via F4
-nmap <silent> <F4> :TagbarToggle<CR>
-
-
-""""""""
-" Unite
-""""""""
-
-"" Enregistre l'historique du presse-papier
-let g:unite_source_history_yank_enable = 1
-nnoremap <leader>y :<C-u>Unite history/yank<CR>
-
-""""""""""""""""""""
-" Unite-colorscheme
-""""""""""""""""""""
-
-nnoremap <leader>c :<C-u>Unite colorscheme -auto-preview<CR>
-
-""""""""""""""
-" Neocomplete
-""""""""""""""
-if has('lua')
+"" Neocomplete
+if neobundle#is_installed("neocomplete")
 
     let g:neocomplete#enable_at_startup = 1
     let g:neocomplete#enable_smart_case = 1
 
-    "" Ferme la popup en appuyant sur entrée quand aucun choix n'est sélectionné
-    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-    function! s:my_cr_function()
-        "return neocomplete#close_popup() . "\<CR>"
-        " For no inserting <CR> key.
-        return pumvisible() ? neocomplete#close_popup() : "\<CR>"
-    endfunction
-
-    "" Tabulation pour sélectionner
-    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-
-    "" Langages
+    "" Languages
     set omnifunc=syntaxcomplete#Complete
 
     "autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
@@ -316,7 +243,7 @@ if has('lua')
     "autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
     "autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
 
-    "" Enable heavy omni completion.
+    "" Enable heavy omni completion
     if !exists('g:neocomplete#sources#omni#input_patterns')
         let g:neocomplete#sources#omni#input_patterns = {}
     endif
@@ -327,28 +254,15 @@ if has('lua')
 
 endif
 
-""""""""""""""""
-" Neocomplcache
-""""""""""""""""
-if !has('lua')
+"" Neocomplcache
+if neobundle#is_installed("neocomplcache")
 
     let g:neocomplcache_enable_at_startup = 1
     let g:neocomplcache_enable_smart_case = 1
     let g:neocomplcache_enable_camel_case_completion = 1
     let g:neocomplcache_enable_underbar_completion = 1
 
-    " Ferme la popup en appuyant sur entrée quand aucun choix n'est sélectionné
-    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
-    function! s:my_cr_function()
-    "return neocomplcache#smart_close_popup() . "\<CR>"
-    " For no inserting <CR> key.
-    return pumvisible() ? neocomplcache#close_popup() : "\<CR>"
-    endfunction
-
-    " Tabulation pour sélectionner
-    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
-
-    " Langages
+    " Languages
     set omnifunc=syntaxcomplete#Complete
 
     "autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
@@ -364,3 +278,106 @@ if !has('lua')
     let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
 
 endif
+
+
+"""""""""""""""""""""
+" Keyboard behaviour
+"""""""""""""""""""""
+
+"" Fix arrow keys mapping in tmux when xterm-keys=on
+if &term =~ '^screen'
+    execute "set <xUp>=\e[1;*A"
+    execute "set <xDown>=\e[1;*B"
+    execute "set <xRight>=\e[1;*C"
+    execute "set <xLeft>=\e[1;*D"
+endif
+
+"" Cursor behaviour when text wrapping is enabled (natural motion)
+nnoremap <down> gj
+nnoremap <up> gk
+
+"" Quick navigation between splits (Ctrl+arrows)
+map <C-left> <C-w>h
+map <C-down> <C-w>j
+map <C-up> <C-w>k
+map <C-right> <C-w>l
+
+"" Braces helpers for programming
+noremap { {}<Left>
+inoremap {<CR> {<CR>}<Esc>O
+inoremap {{ {
+inoremap {} {}
+
+"" Autocompletion popup
+if neobundle#is_installed("neocomplete")
+
+    "" Close the popup by pressing Enter when no choice has been selected
+    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+    function! s:my_cr_function()
+        "return neocomplete#close_popup() . "\<CR>"
+        " For no inserting <CR> key
+        return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+    endfunction
+
+    "" Tab key for selection
+    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+
+endif
+
+if neobundle#is_installed("neocomplete")
+
+    "" Close the popup by pressing Enter when no choice has been selected
+    inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+    function! s:my_cr_function()
+        "return neocomplete#close_popup() . "\<CR>"
+        " For no inserting <CR> key.
+        return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+    endfunction
+
+    "" Tab key for selection
+    inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+
+endif
+
+
+"""""""""""""""""""""
+" Keyboard shortcuts
+"""""""""""""""""""""
+
+"" :w!! = Save a file opened in read-only mode (and no root rights)
+cmap w!! w !sudo tee % >/dev/null
+
+"" Mapleader shortcuts
+" , = <leader> (changed from \ to ,)
+" <leader>p = Paste the system clipboard
+" <leader>/ = Disable search highlight
+" <leader>c = Autopreview the color schemes
+" <leader>y = Display the yank history
+let mapleader=","
+
+nmap <silent> <leader>p :set paste<CR>a<C-R><S-+><Esc>:set nopaste<CR>
+nmap <silent> <leader>/ :nohlsearch<CR>
+
+if neobundle#is_installed("unite-colorscheme")
+    nnoremap <leader>c :<C-u>Unite colorscheme -auto-preview<CR>
+endif
+
+if neobundle#is_installed("unite.vim")
+    nnoremap <leader>y :<C-u>Unite history/yank<CR>
+endif
+
+"" FN shortcuts
+" <F2> = Disable the auto-indent while pasting with the mouse or Ctrl+R (require +xterm_clipboard)
+" <F3> = Open/Close NERDTree
+" <F4> = Open/Close TagBar
+" <F11> = Reload the .vimrc
+" <F12> = Change and save the current file CRLF to Unix ones and encoding to utf-8
+set pastetoggle=<F2>
+if neobundle#is_installed("nerdtree")
+    nmap <silent> <F3> :NERDTreeToggle<CR>
+endif
+if neobundle#is_installed("tagbar")
+    nmap <silent> <F4> :TagbarToggle<CR>
+endif
+nmap <F11> :source ~/.vimrc<CR>
+nmap <F12> :set ff=unix fenc=utf-8<CR>:w<CR>
