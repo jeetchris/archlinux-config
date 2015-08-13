@@ -19,3 +19,4 @@
 	psom = push origin master
 	rim = rebase --interactive master
 	bakaci = commit -m 'To be fixup'
+	redo = commit --amend
