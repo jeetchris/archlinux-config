@@ -176,8 +176,6 @@ set showcmd
 set backspace=indent,eol,start
 set nopaste
 set nrformats=hex
-set splitbelow
-set splitright
 set scrolloff=6
 set wrap
 set showfulltag
