@@ -27,6 +27,7 @@ sf_partages
 .viminfo
 .Xauthority
 .xsession-errors
+.config/ImageMagick/ImagemagickOpenCLDeviceProfile
 .config/obmenu-generator/cache.db
 .config/obmenu-generator/config.pl
 .config/obmenu-generator/icons.db
