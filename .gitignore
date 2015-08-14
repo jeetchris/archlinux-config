@@ -21,9 +21,12 @@ sf_partages
 .mysql_history
 .irb-history
 .pry_history
+.lesshst
 .NERDTreeBookmarks
 .vboxclient-*
 .viminfo
 .Xauthority
 .xsession-errors
 .config/obmenu-generator/cache.db
+.config/obmenu-generator/config.pl
+.config/obmenu-generator/icons.db
