@@ -70,6 +70,10 @@ NeoBundle 'Shougo/vimproc.vim', {
 \    },
 \ }
 
+if executable('fcitx')
+    NeoBundle 'lilydjwg/fcitx.vim'
+endif
+
 "NeoBundle 'Shougo/neosnippet.vim'
 "NeoBundle 'Shougo/neosnippet-snippets'
 "NeoBundle 'tpope/vim-fugitive'
