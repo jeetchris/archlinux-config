@@ -22,13 +22,13 @@ export GIT_PS1_SHOWDIRTYSTATE=1 GIT_PS1_SHOWSTASHSTATE=1 GIT_PS1_SHOWUNTRACKEDFI
 export rvm_ignore_gemrc_issues=1
 
 ## Affichage du PS1
-# Bien refermer avecc \] pour éviter les problèmes d'affichages lors de retour dans l'historique
+# Bien ouvrir et refermer autour des codes couleur avec \[ \] pour éviter les problèmes d'affichages lors de retour dans l'historique
 # Originel
 #PS1='[\u@\h \W]\$ '
 # Sans git
-#PS1='\e[01;32m\]\u@\h\e[0m\]:\e[01;34m\]\w\e[m\]\$ '
+#PS1='\[\e[01;32m\]\u@\h\[\e[0m\]:\[\e[01;34m\]\w\[\e[m\]\$ '
 # Avec git
-PS1='\e[1;32m\]\u@\h\e[0m\]:\e[1;34m\]\w\e[0m\]\e[33m\]$(__git_ps1 " (%s)")\e[0m\]\$ '
+PS1='\[\e[1;32m\]\u@\h\[\e[0m\]:\[\e[1;34m\]\w\[\e[0m\]\[\e[33m\]$(__git_ps1 " (%s)")\[\e[0m\]\$ '
 # Avec rvm
 #PS1="\$($HOME/.rvm/bin/rvm-prompt) $PS1"
 
